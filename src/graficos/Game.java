@@ -3,6 +3,7 @@ package graficos;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -12,16 +13,23 @@ import javax.swing.JFrame;
 public class Game extends Canvas implements Runnable{
 	
 	public static JFrame frame;
-	private final int WIDTH = 160;
-	private final int HEIGHT = 120;
-	private final int SCALE = 4;
+	private final int WIDTH = 240;
+	private final int HEIGHT = 160;
+	private final int SCALE = 3;
 	private boolean isRunning = true;
 	private Thread thread;
 	
 
 	private BufferedImage image;
 	
+	private SpriteSheet sheet;
+	private BufferedImage player;
+	
+	private int x = 0;
+	
 	public Game() {
+		sheet = new SpriteSheet("/spritesheet.png");
+		player = sheet.getSprite(0, 0, 16, 16);
 		this.setPreferredSize(new Dimension(WIDTH*SCALE,HEIGHT*SCALE));
 		initFrame();
 		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
@@ -44,7 +52,12 @@ public class Game extends Canvas implements Runnable{
 	}
 	
 	public synchronized void stop() {
-
+		isRunning = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String args[]) {
@@ -53,7 +66,7 @@ public class Game extends Canvas implements Runnable{
 	}
 	
 	public void tick() {
-		
+		x++;
 	}
 	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
@@ -62,8 +75,12 @@ public class Game extends Canvas implements Runnable{
 			return;
 		}
 		Graphics g = image.getGraphics();
-		g.setColor(new Color(255,0,0));
+		g.setColor(new Color(0,0,0));
 		g.fillRect(0, 0, WIDTH, HEIGHT);
+		//renderização do jogo
+		g.drawImage(player, x, 20, null);
+		//final
+		g.dispose();
 		g = bs.getDrawGraphics();
 		g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
 		bs.show();
@@ -92,5 +109,6 @@ public class Game extends Canvas implements Runnable{
 				timer+=1000;
 			}
 		}
+		stop();
 	}
 }
