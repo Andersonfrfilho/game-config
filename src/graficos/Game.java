@@ -3,8 +3,8 @@ package graficos;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 
@@ -23,13 +23,20 @@ public class Game extends Canvas implements Runnable{
 	private BufferedImage image;
 	
 	private SpriteSheet sheet;
-	private BufferedImage player;
+	private BufferedImage[] player;
+	private int frames = 0;
+	private int maxFrames = 10;
+	private int curAnimation = 0, maxAnimation=3;
 	
 	private int x = 0;
 	
 	public Game() {
 		sheet = new SpriteSheet("/spritesheet.png");
-		player = sheet.getSprite(0, 0, 16, 16);
+		player = new BufferedImage[4];
+		player[0] = sheet.getSprite(0,0,16,16);
+		player[1] = sheet.getSprite(16, 0, 16, 16);
+		player[2] = sheet.getSprite(32, 0, 16, 16);
+		player[3] = sheet.getSprite(48, 0, 16, 16);
 		this.setPreferredSize(new Dimension(WIDTH*SCALE,HEIGHT*SCALE));
 		initFrame();
 		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
@@ -66,7 +73,14 @@ public class Game extends Canvas implements Runnable{
 	}
 	
 	public void tick() {
-		x++;
+		frames++;
+		if(frames>maxFrames) {
+			frames = 0;
+			curAnimation++;
+			if(curAnimation > maxAnimation) {
+				curAnimation=0;
+			}
+		}
 	}
 	public void render() {
 		BufferStrategy bs = this.getBufferStrategy();
@@ -75,10 +89,11 @@ public class Game extends Canvas implements Runnable{
 			return;
 		}
 		Graphics g = image.getGraphics();
-		g.setColor(new Color(0,0,0));
+		g.setColor(new Color(0,0,255));
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		//renderização do jogo
-		g.drawImage(player, x, 20, null);
+		Graphics2D g2 = (Graphics2D) g;
+		g2.drawImage(player[curAnimation], 90, 90, null);
 		//final
 		g.dispose();
 		g = bs.getDrawGraphics();
